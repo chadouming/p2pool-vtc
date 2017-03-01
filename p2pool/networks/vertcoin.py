@@ -13,8 +13,8 @@ MIN_TARGET=4
 MAX_TARGET=2**256//2**20 - 1
 PERSIST=False
 WORKER_PORT=9171
-BOOTSTRAP_ADDRS='vtc.alwayshashing.com crypto.office-on-the.net pool.vtconline.org vertcoin.servepics.com'.split(' ')
+BOOTSTRAP_ADDRS='vtc.alwayshashing.com crypto.office-on-the.net pool.vtconline.org p2pool.kosmoplovci.org'.split(' ')
 ANNOUNCE_CHANNEL='#p2pool-vtc'
 VERSION_CHECK=lambda v: True
-SOFTFORKS_REQUIRED = set(['bip65', 'csv'])
+SOFTFORKS_REQUIRED = set(['nversionbips', 'csv', 'segwit'])
 
