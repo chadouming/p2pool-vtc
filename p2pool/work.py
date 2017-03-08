@@ -379,7 +379,8 @@ class WorkerBridge(worker_interface.WorkerBridge):
         
         if desired_pseudoshare_target is None:
             #target = 2**256-1
-            target = bitcoin_data.difficulty_to_target(float(0.02 / self.node.net.PARENT.DUMB_SCRYPT_DIFF))
+	    #DUMB_SCR
+            target = bitcoin_data.difficulty_to_target(float(1.0 / self.node.net.PARENT.DUMB_SCRYPT_DIFF))
             local_hash_rate = self._estimate_local_hash_rate()
             if local_hash_rate is not None:
                 target = min(target,
