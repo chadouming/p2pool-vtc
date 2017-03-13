@@ -17,4 +17,4 @@ BOOTSTRAP_ADDRS='vtc.alwayshashing.com crypto.office-on-the.net pool.vtconline.o
 ANNOUNCE_CHANNEL='#p2pool-vtc'
 VERSION_CHECK=lambda v: True
 SOFTFORKS_REQUIRED = set(['nversionbips', 'csv', 'segwit'])
-SEGWIT_ACTIVATION_VERSION = 17
+SEGWIT_ACTIVATION_VERSION = 16
