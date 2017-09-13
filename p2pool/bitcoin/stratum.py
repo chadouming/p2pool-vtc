@@ -131,8 +131,14 @@ class StratumRPCMiningProvider(object):
             bits=x['bits'],
             nonce=pack.IntType(32).unpack(getwork._swap4(nonce.decode('hex'))),
         )
-        result = got_response(header, worker_name, coinb_nonce, self.target)
 
+	# Disconnect miners with large DOA rates to prevent DoS
+        res = got_response(header, worker_name, coinb_nonce)
+        if float(len(self.wb._inner.my_doa_share_hashes)) / float(len(self.wb._inner.my_share_hashes)) > 0.60 and len(self.wb._inner.my_share_hashes) > 20:
+            self.transport.loseConnection()
+        return res
+
+        result = got_response(header, worker_name, coinb_nonce, self.target)
         # adjust difficulty on this stratum to target ~10sec/pseudoshare
         if not self.fixed_target:
             self.recent_shares.append(time.time())
@@ -151,7 +157,6 @@ class StratumRPCMiningProvider(object):
 
         return result
 
-    
     def close(self):
         self.wb.new_work_event.unwatch(self.watch_id)
 
