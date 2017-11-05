@@ -187,7 +187,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
 
         desired_pseudoshare_target = None
         desired_share_target = None
-        for symbol, parameter in zip(contents2[::2], contents2[1::2]):
+        '''for symbol, parameter in zip(contents2[::2], contents2[1::2]):
             if symbol == '+':
                 try:
                     desired_pseudoshare_target = bitcoin_data.difficulty_to_target(float(parameter))
@@ -200,6 +200,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
                 except:
                     if p2pool.DEBUG:
                         log.err()
+        '''
 
         if self.args.address == 'dynamic':
             i = self.pubkeys.weighted()
