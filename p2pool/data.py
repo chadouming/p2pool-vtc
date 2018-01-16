@@ -118,7 +118,7 @@ class BaseShare(object):
                             else [('pubkey_hash', pack.IntType(160))]) + [
                 ('subsidy', pack.IntType(64)),
                 ('donation', pack.IntType(16)),
-                ('stale_info', pack.EnumType(pack.IntType(8), dict((k, {0: None, 253: 'orphan', 254: 'doa'}.get(k, 'unk%i' % (k,))) for k in xrange(256)))),
+                ('stale_info', pack.StaleInfoEnumType()),
                 ('desired_version', pack.VarIntType()),
             ]))] + ([segwit_data] if is_segwit_activated(cls.VERSION, net) else []) + ([
             ('new_transaction_hashes', pack.ListType(pack.IntType(256))),
