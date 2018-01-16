@@ -144,6 +144,27 @@ class EnumType(Type):
             raise ValueError('enum item (%r) not in unpack_to_pack (%r)' % (item, self.unpack_to_pack))
         self.inner.write(file, self.unpack_to_pack[item])
 
+stale_pack_to_unpack = dict((k, {0: None, 253: 'orphan', 254: 'doa'}.get(
+    k, 'unk%i' % (k,))) for k in xrange(256))
+stale_unpack_to_pack = {}
+for k, v in stale_pack_to_unpack.iteritems():
+    stale_unpack_to_pack[v] = k
+
+class StaleInfoEnumType(Type):
+    def __init__(self):
+        self.inner = IntType(8)
+
+    def read(self, file):
+        data, file = self.inner.read(file)
+        if data not in stale_pack_to_unpack:
+            raise ValueError('enum data (%r) not in stale_pack_to_unpack (%r)' % (data, stale_pack_to_unpack))
+        return stale_pack_to_unpack[data], file
+    
+    def write(self, file, item):
+        if item not in stale_unpack_to_pack:
+            raise ValueError('enum item (%r) not in stale_unpack_to_pack (%r)' % (item, stale_unpack_to_pack))
+        return self.inner.write(file, stale_unpack_to_pack[item])
+
 class ListType(Type):
     _inner_size = VarIntType()
     
