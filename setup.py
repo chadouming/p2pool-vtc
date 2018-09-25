@@ -1,9 +1,9 @@
 from setuptools import setup
 
 setup(name='p2pool-vtc',
-      version='0.3.0',
+      version='1.0.0',
       description='p2pool for Vertcoin',
-      url='http://github.com/vertcoin/p2pool-vtc',
+      url='http://github.com/vertcoin-project/p2pool-vtc',
       license='GPLv3',
       author = 'James Lovejoy',
       author_email = 'jameslovejoy1@gmail.com',
