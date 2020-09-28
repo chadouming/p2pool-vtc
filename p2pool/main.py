@@ -134,8 +134,8 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
                 address = None
             
             if address is not None:
-                res = yield deferral.retry('Error validating cached address:', 5)(lambda: bitcoind.rpc_validateaddress(address))()
-                if not res['isvalid'] or not res['ismine']:
+                res = yield deferral.retry('Error validating cached address:', 5)(lambda: bitcoind.rpc_getaddressinfo(address))()
+                if not res['ismine']:
                     print '    Cached address is either invalid or not controlled by local bitcoind!'
                     address = None
 

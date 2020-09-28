@@ -13,7 +13,8 @@ setup(name='p2pool-vtc',
           'twisted',
           'argparse',
           'pyOpenSSL',
-          'lyra2re2-hash'
+          'lyra2re2-hash',
+          'verthash'
       ],
       scripts=['run_p2pool.py'],
       include_package_data=True,

@@ -16,5 +16,5 @@ WORKER_PORT=9175
 BOOTSTRAP_ADDRS='fr1.vtconline.org'.split(' ')
 ANNOUNCE_CHANNEL='#p2pool-vtc-testnet'
 VERSION_CHECK=lambda v: True
-SOFTFORKS_REQUIRED = set(['nversionbips', 'csv', 'segwit'])
+SOFTFORKS_REQUIRED = set(['bip34', 'bip66', 'bip65', 'csv', 'segwit'])
 SEGWIT_ACTIVATION_VERSION = 16
