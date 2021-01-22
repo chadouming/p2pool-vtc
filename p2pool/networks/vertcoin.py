@@ -16,6 +16,6 @@ WORKER_PORT=9171
 BOOTSTRAP_ADDRS='vtc.alwayshashing.com crypto.office-on-the.net pool.vtconline.org p2pool.kosmoplovci.org uk1.vtconline.org pool.boxienet.net'.split(' ')
 ANNOUNCE_CHANNEL='#p2pool-vtc'
 VERSION_CHECK=lambda v: True
-SOFTFORKS_REQUIRED = set(['nversionbips', 'csv', 'segwit'])
+SOFTFORKS_REQUIRED = set(['bip34', 'bip66', 'bip65', 'csv', 'segwit'])
 SEGWIT_ACTIVATION_VERSION = 16
 MINIMUM_PROTOCOL_VERSION = 1800
