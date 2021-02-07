@@ -35,7 +35,7 @@ POW_FUNC=lambda data: pack.IntType(256).unpack(verthash_hash(data))
 BLOCK_PERIOD=150 # s
 SYMBOL='VTC'
 CONF_FILE_FUNC=lambda: os.path.join(os.path.join(os.environ['APPDATA'], 'Vertcoin') if platform.system() == 'Windows' else os.path.expanduser('~/Library/Application Support/Vertcoin/') if platform.system() == 'Darwin' else os.path.expanduser('~/.vertcoin'), 'vertcoin.conf')
-BLOCK_EXPLORER_URL_PREFIX='https://insight.vertcoin.org/blocks/'
+BLOCK_EXPLORER_URL_PREFIX='https://insight.vertcoin.org/block/'
 ADDRESS_EXPLORER_URL_PREFIX='https://insight.vertcoin.org/address/'
 TX_EXPLORER_URL_PREFIX='https://insight.vertcoin.org/tx/'
 SANE_TARGET_RANGE=(2**256//1000000000000000000 - 1, 2**256//100000 - 1)
