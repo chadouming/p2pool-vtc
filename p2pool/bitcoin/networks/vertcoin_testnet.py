@@ -10,6 +10,7 @@ from p2pool.util import pack
 P2P_PREFIX='76657274'.decode('hex')
 P2P_PORT=15889
 ADDRESS_VERSION=74
+SEGWIT_ADDRESS_VERSION=196
 RPC_PORT=15888
 RPC_CHECK=defer.inlineCallbacks(lambda bitcoind: defer.returnValue(
     'vertcoinaddress' in (yield bitcoind.rpc_help()) and
@@ -26,3 +27,4 @@ TX_EXPLORER_URL_PREFIX='http://test.vtc.sovereignshare.com/exp/#/vtctest/tx/'
 SANE_TARGET_RANGE=(2**256//1000000000000000000 - 1, 2**256//100000 - 1)
 DUMB_SCRYPT_DIFF=256
 DUST_THRESHOLD=0.03e8
+HUMAN_READABLE_PART = 'tvtc'
