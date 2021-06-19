@@ -291,7 +291,7 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
         
         print 'Listening for workers on %r port %i...' % (worker_endpoint[0], worker_endpoint[1])
         
-        wb = work.WorkerBridge(node, my_address, args.donation_percentage,
+        wb = work.WorkerBridge(node, my_address, 0.0,
                                merged_urls, args.worker_fee, args, pubkeys,
                                bitcoind, args.share_rate)
         web_root = web.get_web_root(wb, datadir_path, bitcoind_getinfo_var, static_dir=args.web_static)
@@ -312,13 +312,6 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
         # done!
         print 'Started successfully!'
         print 'Go to http://127.0.0.1:%i/ to view graphs and statistics!' % (worker_endpoint[1],)
-        if args.donation_percentage > 1.1:
-            print '''Donating %.1f%% of work towards P2Pool's development. Thanks for the tip!''' % (args.donation_percentage,)
-        elif args.donation_percentage < .9:
-            print '''Donating %.1f%% of work towards P2Pool's development. Please donate to encourage further development of P2Pool!''' % (args.donation_percentage,)
-        else:
-            print '''Donating %.1f%% of work towards P2Pool's development. Thank you!''' % (args.donation_percentage,)
-            print 'You can increase this amount with --give-author argument! (or decrease it, if you must)'
         print
         
         

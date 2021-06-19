@@ -32,7 +32,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
         self.args = args
         self.address = my_address
 
-        self.donation_percentage = args.donation_percentage
+        self.donation_percentage = 0.0
         self.worker_fee = args.worker_fee
         
         self.net = self.node.net.PARENT
