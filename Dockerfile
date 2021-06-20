@@ -7,6 +7,7 @@ LABEL description="Dockerized P2Pool (VTC)"
 
 WORKDIR /p2pool
 ENV P2POOL_REPO https://github.com/chadouming/p2pool-vtc.git
+ENV P2POOL_BRANCH v3.0.1a
 
 # update container and install dependencies
 RUN apt-get -y update \
@@ -30,7 +31,7 @@ RUN make all
 RUN python setup.py install
 
 WORKDIR /src/
-RUN git clone $P2POOL_REPO
+RUN git clone --depth 1 --branch $P2POOL_BRANCH $P2POOL_REPO
 
 WORKDIR /src/p2pool-vtc/
 RUN pip install -r requirements.txt
