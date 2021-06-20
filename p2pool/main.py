@@ -164,7 +164,7 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
                 print ' ERROR: Can not use fewer than 2 addresses in dynamic mode. Resetting to 2.'
                 args.numaddresses = 2
             for i in range(args.numaddresses):
-                address = yield deferral.retry('Error getting a dynamic address from bitcoind:', 5)(lambda: bitcoind.rpc_getnewaddress('p2pool'))()
+                address = yield deferral.retry('Error getting a dynamic address from bitcoind:', 5)(lambda: bitcoind.rpc_getnewaddress('p2pool', 'legacy'))()
                 pubkeys.addkey({'address': address})
 
             pubkeys.updatestamp(time.time())

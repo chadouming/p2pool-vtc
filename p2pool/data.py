@@ -65,7 +65,7 @@ def is_segwit_activated(version, net):
     segwit_activation_version = getattr(net, 'SEGWIT_ACTIVATION_VERSION', 0)
     return version >= segwit_activation_version and segwit_activation_version > 0
 
-DONATION_SCRIPT = '4104ffd03de44a6e11b9917f3a29f9443283d9871c9d743ef30d5eddcd37094b64d1b3d8090496b53256786bf5c82932ec23c3b74d9f05a6f95a8b5529352656664bac'.decode('hex')
+DONATION_SCRIPT = '410440F12D23D1936729D7A27AD3915FD94F38A995B1EBBF327F3CAB14367497DCD04545C207EEC3E757E56542493CD64AAD9CC61605DF29F1DA0E0FBFF4747D27FAAC'.decode('hex')
 def donation_script_to_address(net):
     try:
         return bitcoin_data.script2_to_address(
@@ -78,7 +78,7 @@ class BaseShare(object):
     VERSION = 0
     VOTING_VERSION = 0
     SUCCESSOR = None
-    MINIMUM_PROTOCOL_VERSION = 1400
+    MINIMUM_PROTOCOL_VERSION = 3500
     
     small_block_header_type = pack.ComposedType([
         ('version', pack.VarIntType()),
@@ -118,7 +118,7 @@ class BaseShare(object):
                             else [('pubkey_hash', pack.IntType(160))]) + [
                 ('subsidy', pack.IntType(64)),
                 ('donation', pack.IntType(16)),
-                ('stale_info', pack.StaleInfoEnumType()),
+                ('stale_info', pack.EnumType(pack.IntType(8), dict((k, {0: None, 253: 'orphan', 254: 'doa'}.get(k, 'unk%i' % (k,))) for k in xrange(256)))),
                 ('desired_version', pack.VarIntType()),
             ]))] + ([segwit_data] if is_segwit_activated(cls.VERSION, net) else []) + ([
             ('new_transaction_hashes', pack.ListType(pack.IntType(256))),
