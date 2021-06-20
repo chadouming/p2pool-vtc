@@ -1,39 +1,65 @@
 # Dockerfile for P2Pool Server
 
-FROM ubuntu:20.04
+FROM debian:10-slim
 
-LABEL maintainer David Parrish <daveparrish@tutanota.com>
-LABEL description="Dockerized P2Pool"
+LABEL maintainer Chad Cormier Roussel <chadcormierroussel@gmail.com>
+LABEL description="Dockerized P2Pool (VTC)"
 
 WORKDIR /p2pool
-ENV P2POOL_HOME /p2pool/p2pool
-ENV P2POOL_REPO https://github.com/jtoomim/p2pool.git
+ENV P2POOL_REPO https://github.com/chadouming/p2pool-vtc.git
 
+# update container and install dependencies
+RUN apt-get -y update \
+  && apt-get install -y python python-rrdtool python-pygame python-scipy python-twisted python-twisted-web python-pil python-setuptools python-pip git make nano wget  \
+  && apt-get clean
 
-# Using installation instructions for Linux
-# https://github.com/jtoomim/p2pool/blob/155022fc942ec45778a95622766a9b11d923e76e/README.md
-# hadolint ignore=DL3003
-RUN apt-get update \
-  && apt-get -y --no-install-recommends install ca-certificates=20* pypy=7.* pypy-dev=7.* pypy-setuptools=44.* gcc=4:9.* build-essential=12.* git=1:2.* wget=1.* \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* \
-  && mkdir $P2POOL_HOME \
-  && bash -c "wget https://bootstrap.pypa.io/ez_setup.py -O - | pypy" \
-  && rm setuptools-*.zip \
-  && wget https://pypi.python.org/packages/source/z/zope.interface/zope.interface-4.1.3.tar.gz#md5=9ae3d24c0c7415deb249dd1a132f0f79 \
-  && tar zxf zope.interface-4.1.3.tar.gz \
-  && cd /p2pool/zope.interface-4.1.3 \
-  && pypy setup.py install \
-  && cd /p2pool \
-  && rm -r zope.interface-4.1.3* \
-  && wget https://pypi.python.org/packages/source/T/Twisted/Twisted-15.4.0.tar.bz2 \
-  && tar jxf Twisted-15.4.0.tar.bz2 \
-  && cd /p2pool/Twisted-15.4.0 \
-  && pypy setup.py install \
-  && cd /p2pool \
-  && rm -r Twisted-15.4.0*
+ADD src/init.sh /init.sh
+RUN chmod +x /init.sh
 
-COPY . $P2POOL_HOME
+RUN mkdir /src
 
-WORKDIR $P2POOL_HOME
-ENTRYPOINT ["pypy", "run_p2pool.py"]
+WORKDIR /src
+RUN cd /src && git clone https://github.com/vertcoin-project/verthash-pospace
+
+WORKDIR /src/verthash-pospace/tiny_sha3
+RUN git submodule init
+RUN git submodule update
+
+WORKDIR /src/verthash-pospace
+RUN make all
+RUN python setup.py install
+
+WORKDIR /src/
+RUN git clone $P2POOL_REPO
+
+WORKDIR /src/p2pool-vtc/
+RUN pip install -r requirements.txt
+
+WORKDIR /src/p2pool-vtc/lyra2re-hash-python/
+RUN git submodule init
+RUN git submodule update
+
+WORKDIR /src/p2pool-vtc/web-static/
+RUN git submodule init
+RUN git submodule update
+
+WORKDIR /src/p2pool-vtc/
+RUN python setup.py install
+
+# create configuration volume
+VOLUME /config /data
+
+# default environment variables
+ENV RPC_USER user
+ENV RPC_PASSWORD changethisfuckingpassword
+ENV VERTCOIND_HOST 127.0.0.1
+ENV VERTCOIND_HOST_PORT 5888
+ENV FEE 0
+ENV MAX_CONNECTIONS 50
+ENV FEE_ADDRESS VnfNKCy5Aq7vZq5W9UKgMwfDLT7NrPRWZK
+ENV NET vertcoin
+
+# expose mining port
+EXPOSE 9171 9181 9346 9347
+
+ENTRYPOINT ["/init.sh"]
