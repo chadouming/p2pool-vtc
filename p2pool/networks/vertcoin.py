@@ -14,10 +14,9 @@ MAX_TARGET = 2**256//2**20 - 1
 PERSIST = True # Set to False for solo mining or starting a new chain
 WORKER_PORT = 9171
 BOOTSTRAP_ADDRS = [
-        'p2p-south.xyz',
-        'p2p-ekb.xyz',
-        'p2p-usa.xyz',
-        'p2p-spb.xyz',
+        'fr1.vtconline.org',
+        'p2proxy.vertcoin.org',
+        'vtc.consumableresources.com',
         ]
 ANNOUNCE_CHANNEL = '#p2pool-vtc'
 VERSION_CHECK = lambda v: True
