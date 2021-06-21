@@ -1,10 +1,10 @@
 from p2pool.bitcoin import networks
 
 PARENT = networks.nets['vertcoin']
-SHARE_PERIOD = 30 
+SHARE_PERIOD = 15
 CHAIN_LENGTH=24*60*60//30 # shares
 REAL_CHAIN_LENGTH=24*60*60//30 # shares
-TARGET_LOOKBEHIND = 100 # shares
+TARGET_LOOKBEHIND = 200 # shares
 SPREAD = 12 # blocks
 IDENTIFIER = '4B62545B1A631A5C'.decode('hex')
 PREFIX = '1c0c1c71cc197bc1'.decode('hex')
@@ -19,7 +19,7 @@ BOOTSTRAP_ADDRS = [
         'p2p-usa.xyz',
         'p2p-spb.xyz',
         ]
-ANNOUNCE_CHANNEL = '#p2pool'
+ANNOUNCE_CHANNEL = '#p2pool-vtc'
 VERSION_CHECK = lambda v: True
 VERSION_WARNING = lambda v: None
 SOFTFORKS_REQUIRED = set(['bip34', 'bip66', 'bip65', 'csv', 'segwit'])
