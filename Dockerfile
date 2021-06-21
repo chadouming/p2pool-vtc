@@ -7,7 +7,7 @@ LABEL description="Dockerized P2Pool (VTC)"
 
 WORKDIR /p2pool
 ENV P2POOL_REPO https://github.com/chadouming/p2pool-vtc.git
-ENV P2POOL_BRANCH v3.1.0
+ENV P2POOL_BRANCH v3.1.1
 
 # update container and install dependencies
 RUN apt-get -y update \
