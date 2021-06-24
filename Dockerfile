@@ -19,32 +19,19 @@ RUN chmod +x /init.sh
 
 RUN mkdir /src
 
-WORKDIR /src
-RUN cd /src && git clone https://github.com/vertcoin-project/verthash-pospace
-
-WORKDIR /src/verthash-pospace/tiny_sha3
-RUN git submodule init
-RUN git submodule update
-
-WORKDIR /src/verthash-pospace
-RUN make all
-RUN python setup.py install
-
 WORKDIR /src/
 RUN git clone --depth 1 --branch $P2POOL_BRANCH $P2POOL_REPO
 
 WORKDIR /src/p2pool-vtc/
-RUN pip install -r requirements.txt
+RUN git submodule update --init --recursive
+RUN git submodule update --recursive --remote
 
-WORKDIR /src/p2pool-vtc/lyra2re-hash-python/
-RUN git submodule init
-RUN git submodule update
-
-WORKDIR /src/p2pool-vtc/web-static/
-RUN git submodule init
-RUN git submodule update
+WORKDIR /src/p2pool-vtc/verthash-pospace
+RUN make all
+RUN python setup.py install
 
 WORKDIR /src/p2pool-vtc/
+RUN pip install -r requirements.txt
 RUN python setup.py install
 
 # create configuration volume

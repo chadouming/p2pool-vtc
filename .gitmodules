@@ -4,3 +4,6 @@
 [submodule "web-static"]
 	path = web-static
 	url = https://github.com/chadouming/p2pool_web-static
+[submodule "verthash-pospace"]
+	path = verthash-pospace
+	url = https://github.com/vertcoin-project/verthash-pospace
