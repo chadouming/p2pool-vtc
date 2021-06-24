@@ -1,3 +1,6 @@
 [submodule "lyra2re-hash-python"]
 	path = lyra2re-hash-python
 	url = https://github.com/metalicjames/lyra2re-hash-python
+[submodule "web-static"]
+	path = web-static
+	url = https://github.com/chadouming/p2pool_web-static
