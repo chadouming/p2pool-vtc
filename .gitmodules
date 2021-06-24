@@ -3,7 +3,7 @@
 	url = https://github.com/metalicjames/lyra2re-hash-python
 [submodule "web-static"]
 	path = web-static
-	url = https://github.com/chadouming/p2pool_web-static
+	url = https://github.com/chadouming/p2pool_web-static.git
 [submodule "verthash-pospace"]
 	path = verthash-pospace
 	url = https://github.com/vertcoin-project/verthash-pospace
