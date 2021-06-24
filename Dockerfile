@@ -7,7 +7,7 @@ LABEL description="Dockerized P2Pool (VTC)"
 
 WORKDIR /p2pool
 ENV P2POOL_REPO https://github.com/chadouming/p2pool-vtc.git
-ENV P2POOL_BRANCH v3.2.0
+ENV P2POOL_BRANCH master
 
 # update container and install dependencies
 RUN apt-get -y update \
@@ -24,14 +24,15 @@ RUN git clone --depth 1 --branch $P2POOL_BRANCH $P2POOL_REPO
 
 WORKDIR /src/p2pool-vtc/
 RUN git submodule update --init --recursive
-RUN git submodule update --recursive --remote
+RUN git submodule update --recursive
+RUN ls
 
 WORKDIR /src/p2pool-vtc/verthash-pospace
 RUN make all
 RUN python setup.py install
 
 WORKDIR /src/p2pool-vtc/
-RUN pip install -r requirements.txt
+# RUN pip install -r requirements.txt
 RUN python setup.py install
 
 # create configuration volume
