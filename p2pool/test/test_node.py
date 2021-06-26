@@ -1,4 +1,4 @@
-from __future__ import division
+
 
 import base64
 import random
@@ -19,10 +19,10 @@ class bitcoind(object): # can be used as p2p factory, p2p protocol, or rpc jsonr
         self.headers = {0x16c169477c25421250ec5d32cf9c6d38538b5de970a2355fd89: {
             'nonce': 1853158954,
             'timestamp': 1351658517,
-            'merkle_root': 2282849479936278423916707524932131168473430114569971665822757638339486597658L,
+            'merkle_root': 2282849479936278423916707524932131168473430114569971665822757638339486597658,
             'version': 1,
-            'previous_block': 1048610514577342396345362905164852351970507722694242579238530L,
-            'bits': bitcoin_data.FloatingInteger(bits=0x1a0513c5, target=0x513c50000000000000000000000000000000000000000000000L),
+            'previous_block': 1048610514577342396345362905164852351970507722694242579238530,
+            'bits': bitcoin_data.FloatingInteger(bits=0x1a0513c5, target=0x513c50000000000000000000000000000000000000000000000),
         }}
         
         self.conn = variable.Variable(self)
@@ -66,7 +66,7 @@ class bitcoind(object): # can be used as p2p factory, p2p protocol, or rpc jsonr
             result = param['data']
             block = bitcoin_data.block_type.unpack(result.decode('hex'))
             if sum(tx_out['value'] for tx_out in block['txs'][0]['tx_outs']) != sum(tx['tx_outs'][0]['value'] for tx in block['txs'][1:]) + 5000000000:
-                print 'invalid fee'
+                print('invalid fee')
             if block['header']['previous_block'] != self.blocks[-1]:
                 return False
             if bitcoin_data.hash256(result.decode('hex')) > block['header']['bits'].target:
@@ -80,7 +80,7 @@ class bitcoind(object): # can be used as p2p factory, p2p protocol, or rpc jsonr
             raise jsonrpc.Error_for_code(-1)('invalid request')
         
         txs = []
-        for i in xrange(100):
+        for i in range(100):
             fee = i
             txs.append(dict(
                 data=bitcoin_data.tx_type.pack(dict(version=1, tx_ins=[], tx_outs=[dict(value=fee, script='hello!'*100)], lock_time=0)).encode('hex'),
@@ -112,10 +112,10 @@ class bitcoind(object): # can be used as p2p factory, p2p protocol, or rpc jsonr
 @apply
 class mm_provider(object):
     def __getattr__(self, name):
-        print '>>>>>>>', name
+        print('>>>>>>>', name)
     def rpc_getauxblock(self, request, result1=None, result2=None):
         if result1 is not None:
-            print result1, result2
+            print(result1, result2)
             return True
         return {
             "target" : "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", # 2**256*2/3
@@ -192,7 +192,7 @@ class Test(unittest.TestCase):
         
         yield deferral.sleep(3)
         
-        for i in xrange(100):
+        for i in range(100):
             blah = yield proxy.rpc_getwork()
             yield proxy.rpc_getwork(blah['data'])
         
@@ -224,19 +224,19 @@ class Test(unittest.TestCase):
         bitd = bitcoind()
         
         nodes = []
-        for i in xrange(N):
+        for i in range(N):
             nodes.append((yield MiniNode.start(mynet, bitd, bitd, [mn.n.p2p_node.serverfactory.listen_port.getHost().port for mn in nodes], [])))
         
         yield deferral.sleep(3)
         
-        for i in xrange(SHARES):
+        for i in range(SHARES):
             proxy = jsonrpc.HTTPProxy('http://127.0.0.1:' + str(random.choice(nodes).web_port.getHost().port),
                 headers=dict(Authorization='Basic ' + base64.b64encode('user/0:password')))
             blah = yield proxy.rpc_getwork()
             yield proxy.rpc_getwork(blah['data'])
             yield deferral.sleep(.05)
-            print i
-            print type(nodes[0].n.tracker.items[nodes[0].n.best_share_var.value])
+            print(i)
+            print(type(nodes[0].n.tracker.items[nodes[0].n.best_share_var.value]))
         
         # crawl web pages
         from p2pool import web
@@ -245,16 +245,16 @@ class Test(unittest.TestCase):
         web2_port = reactor.listenTCP(0, server.Site(web2_root))
         for name in web2_root.listNames() + ['web/' + x for x in web2_root.getChildWithDefault('web', None).listNames()]:
             if name in ['web/graph_data', 'web/share', 'web/share_data']: continue
-            print
-            print name
+            print()
+            print(name)
             try:
                 res = yield client.getPage('http://127.0.0.1:%i/%s' % (web2_port.getHost().port, name))
             except:
                 import traceback
                 traceback.print_exc()
             else:
-                print repr(res)[:100]
-            print
+                print(repr(res)[:100])
+            print()
         yield web2_port.stopListening()
         stop_event.happened()
         del web2_root

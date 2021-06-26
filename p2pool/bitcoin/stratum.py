@@ -17,10 +17,10 @@ class StratumRPCMiningProvider(object):
         self.wb = wb
         self.other = other
         self.transport = transport
-        
+
         self.username = None
         self.handler_map = expiring_dict.ExpiringDict(300)
-        
+
         self.watch_id = self.wb.new_work_event.watch(self._send_work)
 
         self.recent_shares = []
@@ -29,22 +29,21 @@ class StratumRPCMiningProvider(object):
         self.fixed_target = False
         self.desired_pseudoshare_target = None
 
-    
     def rpc_subscribe(self, miner_version=None, session_id=None, *args):
         reactor.callLater(0, self._send_work)
-        
+
         return [
             ["mining.notify", "ae6812eb4cd7735a302a8a9dd95cf71f"], # subscription details
             "", # extranonce1
             self.wb.COINBASE_NONCE_LENGTH, # extranonce2_size
         ]
-    
+
     def rpc_authorize(self, username, password):
         if not hasattr(self, 'authorized'): # authorize can be called many times in one connection
-            print '>>>Authorize: %s from %s' % (username, self.transport.getPeer().host)
+            print('>>>Authorize: %s from %s' % (username, self.transport.getPeer().host))
             self.authorized = username
         self.username = username.strip()
-        
+
         self.user, self.address, self.desired_share_target, self.desired_pseudoshare_target = self.wb.get_user_details(username)
         reactor.callLater(0, self._send_work)
         return True
@@ -66,9 +65,9 @@ class StratumRPCMiningProvider(object):
             #pool can send mining.set_version_mask at any time if the pool mask changes
 
         if 'minimum-difficulty' in extensions:
-            print 'Extension method minimum-difficulty not implemented'
+            print('Extension method minimum-difficulty not implemented')
         if 'subscribe-extranonce' in extensions:
-            print 'Extension method subscribe-extranonce not implemented'
+            print('Extension method subscribe-extranonce not implemented')
 
     def _send_work(self):
         try:
@@ -103,7 +102,7 @@ class StratumRPCMiningProvider(object):
         #asicboost: version_bits is the version mask that the miner used
         worker_name = worker_name.strip()
         if job_id not in self.handler_map:
-            print >>sys.stderr, '''Couldn't link returned work's job id with its handler. This should only happen if this process was recently restarted!'''
+            print('''Couldn't link returned work's job id with its handler. This should only happen if this process was recently restarted!''', file=sys.stderr)
             #self.other.svc_client.rpc_reconnect().addErrback(lambda err: None)
             return False
         x, got_response = self.handler_map[job_id]
@@ -143,7 +142,7 @@ class StratumRPCMiningProvider(object):
                 self.target = int(self.target * clip((time.time() - old_time)/(len(self.recent_shares)*self.share_rate), 0.5, 2.) + 0.5)
                 newtarget = clip(self.target, self.wb.net.SANE_TARGET_RANGE[0], self.wb.net.SANE_TARGET_RANGE[1])
                 if newtarget != self.target:
-                    print "Clipping target from %064x to %064x" % (self.target, newtarget)
+                    print("Clipping target from %064x to %064x" % (self.target, newtarget))
                     self.target = newtarget
                 self.target = max(x['min_share_target'], self.target)
                 self.recent_shares = [time.time()]

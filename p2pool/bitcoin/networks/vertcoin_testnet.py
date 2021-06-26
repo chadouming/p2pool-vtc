@@ -16,7 +16,7 @@ if verthash_data is None:
 def verthash_hash(dat):
     return verthash.getPoWHash(dat, verthash_data)
 
-P2P_PREFIX='76657274'.decode('hex')
+P2P_PREFIX=bytes.fromhex('76657274')
 P2P_PORT=15889
 ADDRESS_VERSION=74
 SEGWIT_ADDRESS_VERSION=196

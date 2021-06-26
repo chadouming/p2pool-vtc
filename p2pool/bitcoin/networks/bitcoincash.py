@@ -8,7 +8,7 @@ from p2pool.util import pack
 
 
 #P2P_PREFIX = 'f9beb4d9'.decode('hex') # disk magic and old net magic
-P2P_PREFIX = 'e3e1f3e8'.decode('hex') # new net magic
+P2P_PREFIX = bytes.fromhex('e3e1f3e8') # new net magic
 P2P_PORT = 8333
 ADDRESS_VERSION = 0
 ADDRESS_P2SH_VERSION = 5

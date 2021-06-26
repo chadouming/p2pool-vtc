@@ -2,7 +2,7 @@
 Representation of a getwork request/reply
 '''
 
-from __future__ import division
+
 
 from . import data as bitcoin_data
 from . import sha256
@@ -11,7 +11,7 @@ from p2pool.util import pack
 def _swap4(s):
     if len(s) % 4:
         raise ValueError()
-    return ''.join(s[x:x+4][::-1] for x in xrange(0, len(s), 4))
+    return ''.join(s[x:x+4][::-1] for x in range(0, len(s), 4))
 
 class BlockAttempt(object):
     def __init__(self, version, previous_block, merkle_root, timestamp, bits, share_target):
@@ -29,7 +29,7 @@ class BlockAttempt(object):
         return not (self == other)
     
     def __repr__(self):
-        return 'BlockAttempt(%s)' % (', '.join('%s=%r' % (k, v) for k, v in self.__dict__.iteritems()),)
+        return 'BlockAttempt(%s)' % (', '.join('%s=%r' % (k, v) for k, v in self.__dict__.items()),)
     
     def getwork(self, **extra):
         if 'data' in extra or 'hash1' in extra or 'target' in extra or 'midstate' in extra:

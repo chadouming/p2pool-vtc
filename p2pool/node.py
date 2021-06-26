@@ -20,35 +20,32 @@ class P2PNode(p2p.Node):
             mining_txs_var=node.mining_txs_var,   # transactions from getblocktemplate
             mining2_txs_var=node.mining2_txs_var, # transactions sent to miners
         **kwargs)
-    
+
     def handle_shares(self, shares, peer):
         if len(shares) > 5:
-            print 'Processing %i shares from %s...' % (len(shares), '%s:%i' % peer.addr if peer is not None else None)
-        
+            print('Processing %i shares from %s...' % (len(shares), '%s:%i' % peer.addr if peer is not None else None))
+
         new_count = 0
         all_new_txs = {}
         for share, new_txs in shares:
             if new_txs is not None:
                 all_new_txs.update((bitcoin_data.hash256(bitcoin_data.tx_type.pack(new_tx)), new_tx) for new_tx in new_txs)
-            
+
             if share.hash in self.node.tracker.items:
                 #print 'Got duplicate share, ignoring. Hash: %s' % (p2pool_data.format_hash(share.hash),)
                 continue
-            
             new_count += 1
-            
+
             #print 'Received share %s from %r' % (p2pool_data.format_hash(share.hash), share.peer_addr)
-            
             self.node.tracker.add(share)
-        
         self.node.known_txs_var.add(all_new_txs)
-        
+
         if new_count:
             self.node.set_best_share()
-        
+
         if len(shares) > 5:
-            print '... done processing %i shares. New: %i Have: %i/~%i' % (len(shares), new_count, len(self.node.tracker.items), 2*self.node.net.CHAIN_LENGTH)
-    
+            print('... done processing %i shares. New: %i Have: %i/~%i' % (len(shares), new_count, len(self.node.tracker.items), 2*self.node.net.CHAIN_LENGTH))
+
     @defer.inlineCallbacks
     def handle_share_hashes(self, hashes, peer):
         new_hashes = [x for x in hashes if x not in self.node.tracker.items]
@@ -60,12 +57,12 @@ class P2PNode(p2p.Node):
                 parents=0,
                 stops=[],
             )
-        except:
-            log.err(None, 'in handle_share_hashes:')
+        except Exception as e:
+            log.err(None, 'in handle_share_hashes:' + str(e))
             peer.badPeerHappened(30)
         else:
             self.handle_shares([(share, []) for share in shares], peer)
-    
+
     def handle_get_shares(self, hashes, parents, stops, peer):
         parents = min(parents, 1000//len(hashes))
         stops = set(stops)
@@ -76,14 +73,14 @@ class P2PNode(p2p.Node):
                     break
                 shares.append(share)
         if len(shares) > 0:
-            print 'Sending %i shares to %s:%i' % (len(shares), peer.addr[0], peer.addr[1])
+            print('Sending %i shares to %s:%i' % (len(shares), peer.addr[0], peer.addr[1]))
         return shares
-    
+
     def handle_bestblock(self, header, peer):
         if self.node.net.PARENT.POW_FUNC(bitcoin_data.block_header_type.pack(header)) > header['bits'].target:
             raise p2p.PeerMisbehavingError('received block header fails PoW test')
         self.node.handle_header(header)
-    
+
     def broadcast_share(self, share_hash):
         shares = []
         for share in self.node.tracker.get_chain(share_hash, min(5, self.node.tracker.get_height(share_hash))):
@@ -91,29 +88,27 @@ class P2PNode(p2p.Node):
                 break
             self.shared_share_hashes.add(share.hash)
             shares.append(share)
-        
-        for peer in self.peers.itervalues():
+
+        for peer in self.peers.values():
             peer.sendShares([share for share in shares if share.peer_addr != peer.addr], self.node.tracker, self.node.known_txs_var.value, include_txs_with=[share_hash])
-    
+
     def start(self):
         p2p.Node.start(self)
-        
         self.shared_share_hashes = set(self.node.tracker.items)
         self.node.tracker.removed.watch_weakref(self, lambda self, share: self.shared_share_hashes.discard(share.hash))
-        
-        @apply
+
         @defer.inlineCallbacks
         def download_shares():
             while True:
                 desired = yield self.node.desired_var.get_when_satisfies(lambda val: len(val) != 0)
                 peer_addr, share_hash = random.choice(desired)
-                
+
                 if len(self.peers) == 0:
                     yield deferral.sleep(1)
                     continue
-                peer = random.choice(self.peers.values())
-                
-                print 'Requesting parent share %s from %s' % (p2pool_data.format_hash(share_hash), '%s:%i' % peer.addr)
+                peer = random.choice(list(self.peers.values()))
+
+                print('Requesting parent share %s from %s' % (p2pool_data.format_hash(share_hash), '%s:%i' % peer.addr))
                 try:
                     shares = yield peer.get_shares(
                         hashes=[share_hash],
@@ -123,22 +118,23 @@ class P2PNode(p2p.Node):
                         ))[:100],
                     )
                 except defer.TimeoutError:
-                    print 'Share request timed out!'
+                    print('Share request timed out!')
                     continue
-                except:
-                    log.err(None, 'in download_shares:')
+                except Exception as e:
+                    log.err(None, 'in download_shares:%s' % e)
                     peer.badPeerHappened(30)
                     continue
-                
+
                 if not shares:
                     yield deferral.sleep(1) # sleep so we don't keep rerequesting the same share nobody has
                     continue
                 self.handle_shares([(share, []) for share in shares], peer)
-        
-        
+
+        download_shares()
+
         @self.node.best_block_header.changed.watch
         def _(header):
-            for peer in self.peers.itervalues():
+            for peer in self.peers.values():
                 peer.send_bestblock(header=header)
         
         # send share when the chain changes to their chain
@@ -175,16 +171,16 @@ class Node(object):
         self.punish = False
 
         self.tracker = p2pool_data.OkayTracker(self.net)
-        
 
         for share in shares:
             self.tracker.add(share)
-        
+
         for share_hash in known_verified_share_hashes:
             if share_hash in self.tracker.items:
                 self.tracker.verified.add(self.tracker.items[share_hash])
-        
+
         self.p2p_node = None # overwritten externally
+        self.cur_share_ver = 0
 
     def check_and_purge_txs(self):
         if self.cur_share_ver < 34:
@@ -201,9 +197,9 @@ class Node(object):
     def start(self):
         stop_signal = variable.Event()
         self.stop = stop_signal.happened
-        
+
         # BITCOIND WORK
-        
+
         self.bitcoind_work = variable.Variable((yield helper.getwork(self.bitcoind)))
 
         @defer.inlineCallbacks
@@ -217,9 +213,9 @@ class Node(object):
                     log.err()
                 yield defer.DeferredList([flag, deferral.sleep(15)], fireOnOneCallback=True)
         work_poller()
-        
+
         # PEER WORK
-        
+
         self.best_block_header = variable.Variable(None)
         def handle_header(new_header):
             # check that header matches current target
@@ -258,7 +254,7 @@ class Node(object):
         @self.bitcoind_work.changed.run_and_watch
         def _(_=None):
             new_mining_txs = dict(zip(self.bitcoind_work.value['transaction_hashes'], self.bitcoind_work.value['transactions']))
-            added_known_txs = {hsh:tx for hsh,tx in new_mining_txs.iteritems() if not hsh in self.known_txs_var.value}
+            added_known_txs = {hsh:tx for hsh,tx in new_mining_txs.items() if not hsh in self.known_txs_var.value}
             self.mining_txs_var.set(new_mining_txs)
             self.known_txs_var.add(added_known_txs)
         # add p2p transactions from bitcoind to known_txs
@@ -285,24 +281,24 @@ class Node(object):
                 return
             
             if share.VERSION >= 34:
-                print 'GOT BLOCK FROM PEER! %s %s%064x' % (
+                print('GOT BLOCK FROM PEER! %s %s%064x' % (
                         p2pool_data.format_hash(share.hash),
                         self.net.PARENT.BLOCK_EXPLORER_URL_PREFIX,
-                        share.header_hash)
+                        share.header_hash))
                 return
             block = share.as_block(self.tracker, self.known_txs_var.value)
             if block is None:
-                print >>sys.stderr, 'GOT INCOMPLETE BLOCK FROM PEER! %s bitcoin: %s%064x' % (p2pool_data.format_hash(share.hash), self.net.PARENT.BLOCK_EXPLORER_URL_PREFIX, share.header_hash)
+                print('GOT INCOMPLETE BLOCK FROM PEER! %s bitcoin: %s%064x' % (p2pool_data.format_hash(share.hash), self.net.PARENT.BLOCK_EXPLORER_URL_PREFIX, share.header_hash), file=sys.stderr)
                 return
             helper.submit_block(block, True, self)
-            print
-            print 'GOT BLOCK FROM PEER! Passing to bitcoind! %s bitcoin: %s%064x' % (p2pool_data.format_hash(share.hash), self.net.PARENT.BLOCK_EXPLORER_URL_PREFIX, share.header_hash)
-            print
+            print()
+            print('GOT BLOCK FROM PEER! Passing to bitcoind! %s bitcoin: %s%064x' % (p2pool_data.format_hash(share.hash), self.net.PARENT.BLOCK_EXPLORER_URL_PREFIX, share.header_hash))
+            print()
 
         def forget_old_txs():
             new_known_txs = {}
             if self.p2p_node is not None:
-                for peer in self.p2p_node.peers.itervalues():
+                for peer in self.p2p_node.peers.values():
                     new_known_txs.update(peer.remembered_txs)
             new_known_txs.update(self.mining_txs_var.value)
             new_known_txs.update(self.mining2_txs_var.value)
@@ -337,7 +333,7 @@ class Node(object):
         if self.p2p_node is not None:
             for bad_peer_address in bad_peer_addresses:
                 # XXX O(n)
-                for peer in self.p2p_node.peers.itervalues():
+                for peer in self.p2p_node.peers.values():
                     if peer.addr == bad_peer_address:
                         peer.badPeerHappened()
                         break
@@ -350,9 +346,9 @@ class Node(object):
         
         # eat away at heads
         if decorated_heads:
-            for i in xrange(1000):
+            for i in range(1000):
                 to_remove = set()
-                for share_hash, tail in self.tracker.heads.iteritems():
+                for share_hash, tail in self.tracker.heads.items():
                     if share_hash in [head_hash for score, head_hash in decorated_heads[-5:]]:
                         #print 1
                         continue
@@ -372,9 +368,9 @@ class Node(object):
                 #print "_________", to_remove
         
         # drop tails
-        for i in xrange(1000):
+        for i in range(1000):
             to_remove = set()
-            for tail, heads in self.tracker.tails.iteritems():
+            for tail, heads in self.tracker.tails.items():
                 if min(self.tracker.get_height(head) for head in heads) < 2*self.tracker.net.CHAIN_LENGTH + 10:
                     continue
                 to_remove.update(self.tracker.reverse.get(tail, set()))
@@ -384,7 +380,7 @@ class Node(object):
             #start = time.time()
             for aftertail in to_remove:
                 if self.tracker.items[aftertail].previous_hash not in self.tracker.tails:
-                    print "erk", aftertail, self.tracker.items[aftertail].previous_hash
+                    print("erk", aftertail, self.tracker.items[aftertail].previous_hash)
                     continue
                 if aftertail in self.tracker.verified.items:
                     self.tracker.verified.remove(aftertail)

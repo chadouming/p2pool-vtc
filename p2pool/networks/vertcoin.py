@@ -1,13 +1,13 @@
 from p2pool.bitcoin import networks
 
 PARENT = networks.nets['vertcoin']
-SHARE_PERIOD = 30 
+SHARE_PERIOD = 30
 CHAIN_LENGTH=24*60*60//30 # shares
 REAL_CHAIN_LENGTH=24*60*60//30 # shares
 TARGET_LOOKBEHIND = 100 # shares
 SPREAD = 12 # blocks
-IDENTIFIER = '4B62545B1A631A5C'.decode('hex')
-PREFIX = '1c0c1c71cc197bc1'.decode('hex')
+IDENTIFIER = bytes.fromhex('4B62545B1A631A5C')
+PREFIX = bytes.fromhex('1c0c1c71cc197bc1')
 P2P_PORT = 9346
 MIN_TARGET = 0
 MAX_TARGET = 2**256//2**20 - 1

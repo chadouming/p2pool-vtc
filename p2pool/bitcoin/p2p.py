@@ -15,7 +15,7 @@ from p2pool.util import deferral, p2protocol, pack, variable
 class Protocol(p2protocol.Protocol):
     def __init__(self, net):
         p2protocol.Protocol.__init__(self, net.P2P_PREFIX, 32000000, ignore_trailing_payload=True)
-    
+
     def connectionMade(self):
         self.send_version(
             version=70015,
@@ -32,10 +32,10 @@ class Protocol(p2protocol.Protocol):
                 port=self.transport.getHost().port,
             ),
             nonce=random.randrange(2**64),
-            sub_version_num='/P2Pool:%s/' % (p2pool.__version__,),
+            sub_version_num=b'/P2Pool:%s/' % p2pool.__version__,
             start_height=0,
         )
-    
+
     message_version = pack.ComposedType([
         ('version', pack.IntType(32)),
         ('services', pack.IntType(64)),
@@ -75,7 +75,7 @@ class Protocol(p2protocol.Protocol):
             elif inv['type'] == 'block':
                 self.factory.new_block.happened(inv['hash'])
             else:
-                print 'Unknown inv type', inv
+                print('Unknown inv type', inv)
     
     message_getdata = pack.ComposedType([
         ('requests', pack.ListType(pack.ComposedType([
@@ -155,7 +155,7 @@ class Protocol(p2protocol.Protocol):
     ])
     def handle_reject(self, message, ccode, reason, data):
         if p2pool.DEBUG:
-            print >>sys.stderr, 'Received reject message (%s): %s' % (message, reason)
+            print('Received reject message (%s): %s' % message.decode('ascii'), reason.decode('ascii'), file=sys.stderr)
     
     def connectionLost(self, reason):
         if hasattr(self.factory, 'gotConnection'):
@@ -163,7 +163,7 @@ class Protocol(p2protocol.Protocol):
         if hasattr(self, 'pinger'):
             self.pinger.stop()
         if p2pool.DEBUG:
-            print >>sys.stderr, 'Bitcoin connection lost. Reason:', reason.getErrorMessage()
+            print('Bitcoin connection lost. Reason:', reason.getErrorMessage(), file=sys.stderr)
 
 class ClientFactory(protocol.ReconnectingClientFactory):
     protocol = Protocol

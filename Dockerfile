@@ -11,7 +11,7 @@ ENV P2POOL_BRANCH master
 
 # update container and install dependencies
 RUN apt-get -y update \
-  && apt-get install -y python python-rrdtool python-pygame python-scipy python-twisted python-twisted-web python-pil python-setuptools python-pip git make nano wget  \
+  && apt-get install -y python3 python3-rrdtool python3-pygame python3-scipy python3-twisted python3-pil python3-setuptools python3-pip git make nano wget  \
   && apt-get clean
 
 ADD src/init.sh /init.sh
@@ -25,15 +25,13 @@ RUN git clone --depth 1 --branch $P2POOL_BRANCH $P2POOL_REPO
 WORKDIR /src/p2pool-vtc/
 RUN git submodule update --init --recursive
 RUN git submodule update --recursive
-RUN ls
 
 WORKDIR /src/p2pool-vtc/verthash-pospace
 RUN make all
-RUN python setup.py install
+RUN python3 setup.py install
 
 WORKDIR /src/p2pool-vtc/
-# RUN pip install -r requirements.txt
-RUN python setup.py install
+RUN python3 setup.py install
 
 # create configuration volume
 VOLUME /config /data

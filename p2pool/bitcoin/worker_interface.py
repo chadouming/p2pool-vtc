@@ -1,6 +1,6 @@
-from __future__ import division
 
-import StringIO
+
+import io
 import json
 import random
 import sys
@@ -46,7 +46,7 @@ class WorkerInterface(object):
         res.putChild('', _GETableServer(_Provider(self, long_poll=False), get_handler))
         
         def repost(request):
-            request.content = StringIO.StringIO(json.dumps(dict(id=0, method='getwork')))
+            request.content = io.StringIO(json.dumps(dict(id=0, method='getwork')))
             return s.render_POST(request)
         s = _GETableServer(_Provider(self, long_poll=True), repost)
         res.putChild('long-polling', s)
@@ -62,22 +62,22 @@ class WorkerInterface(object):
         if data is not None:
             header = getwork.decode_data(data)
             if header['merkle_root'] not in self.merkle_root_to_handler:
-                print >>sys.stderr, '''Couldn't link returned work's merkle root with its handler. This should only happen if this process was recently restarted!'''
+                print('''Couldn't link returned work's merkle root with its handler. This should only happen if this process was recently restarted!''', file=sys.stderr)
                 defer.returnValue(False)
             defer.returnValue(self.merkle_root_to_handler[header['merkle_root']](header, request.getUser() if request.getUser() is not None else '', '\0'*self.worker_bridge.COINBASE_NONCE_LENGTH))
         
         if p2pool.DEBUG:
             id = random.randrange(1000, 10000)
-            print 'POLL %i START is_long_poll=%r user_agent=%r user=%r' % (id, long_poll, request.getHeader('User-Agent'), request.getUser())
+            print('POLL %i START is_long_poll=%r user_agent=%r user=%r' % (id, long_poll, request.getHeader('User-Agent'), request.getUser()))
         
         if long_poll:
             request_id = request.getClientIP(), request.getHeader('Authorization')
             if self.worker_views.get(request_id, self.worker_bridge.new_work_event.times) != self.worker_bridge.new_work_event.times:
                 if p2pool.DEBUG:
-                    print 'POLL %i PUSH' % (id,)
+                    print('POLL %i PUSH' % (id,))
             else:
                 if p2pool.DEBUG:
-                    print 'POLL %i WAITING' % (id,)
+                    print('POLL %i WAITING' % (id,))
                 yield self.worker_bridge.new_work_event.get_deferred()
             self.worker_views[request_id] = self.worker_bridge.new_work_event.times
         
@@ -95,7 +95,7 @@ class WorkerInterface(object):
         self.merkle_root_to_handler[res.merkle_root] = handler
         
         if p2pool.DEBUG:
-            print 'POLL %i END identifier=%i' % (id, self.worker_bridge.new_work_event.times)
+            print('POLL %i END identifier=%i' % (id, self.worker_bridge.new_work_event.times))
         
         extra_params = {}
         if request.getHeader('User-Agent') == 'Jephis PIC Miner':

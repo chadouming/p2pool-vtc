@@ -20,9 +20,9 @@
 
 """Reference implementation for Bech32 and segwit addresses."""
 
-from math import convertbits
+from .math import convertbits
 
-CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
+CHARSET = b"qpzry9x8gf2tvdw0s3jn54khce6mua7l"
 
 
 def bech32_polymod(values):
@@ -39,7 +39,7 @@ def bech32_polymod(values):
 
 def bech32_hrp_expand(hrp):
     """Expand the HRP into values for checksum computation."""
-    return [ord(x) >> 5 for x in hrp] + [0] + [ord(x) & 31 for x in hrp]
+    return [x >> 5 for x in hrp] + [0] + [x & 31 for x in hrp]
 
 
 def bech32_verify_checksum(hrp, data):
@@ -57,16 +57,16 @@ def bech32_create_checksum(hrp, data):
 def bech32_encode(hrp, data):
     """Compute a Bech32 string given HRP and data values."""
     combined = data + bech32_create_checksum(hrp, data)
-    return hrp + '1' + ''.join([CHARSET[d] for d in combined])
+    return hrp + b'1' + ''.join([CHARSET[d] for d in combined])
 
 
 def bech32_decode(bech):
     """Validate a Bech32 string, and determine HRP and data."""
-    if ((any(ord(x) < 33 or ord(x) > 126 for x in bech)) or
+    if ((any(x < 33 or x > 126 for x in bech)) or
             (bech.lower() != bech and bech.upper() != bech)):
         return (None, None)
     bech = bech.lower()
-    pos = bech.rfind('1')
+    pos = bech.rfind(b'1')
     if pos < 1 or pos + 7 > len(bech) or len(bech) > 90:
         return (None, None)
     if not all(x in CHARSET for x in bech[pos+1:]):

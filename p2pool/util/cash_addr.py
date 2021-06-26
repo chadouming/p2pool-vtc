@@ -18,9 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from math import convertbits
+from .math import convertbits
 
-CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
+CHARSET = b"qpzry9x8gf2tvdw0s3jn54khce6mua7l"
 
 # Cashaddr format
 #
@@ -85,8 +85,7 @@ def polymod(values):
 
 def expand_prefix(prefix):
     """Expand the address prefix into values for checksum computation."""
-    data = [ord(x) & 31 for x in prefix] + [0]
-    return [ord(x) & 31 for x in prefix] + [0]
+    return [x & 31 for x in prefix] + [0]
 
 def verify_checksum(prefix, data):
     """Verify a checksum given prefix and converted data characters."""
@@ -101,7 +100,7 @@ def create_checksum(prefix, data):
 def assemble(prefix, data):
     """Compute a cashaddr string given prefix and data values."""
     combined = data + create_checksum(prefix, data)
-    return prefix + ':' + ''.join([CHARSET[d] for d in combined])
+    return prefix + b':' + bytes([CHARSET[d] for d in combined])
 
 def valid_version(data):
     """Check that the version is correct for the data.
@@ -124,13 +123,13 @@ def valid_version(data):
 
 def disassemble(cashaddr, default_prefix):
     """Validate a cashaddr string, and determine prefix and data."""
-    if ((any(ord(x) < 33 or ord(x) > 126 for x in cashaddr)) or
+    if ((any(x < 33 or x > 126 for x in cashaddr)) or
             (cashaddr.lower() != cashaddr and cashaddr.upper() != cashaddr)):
         return (None, None)
     cashaddr = cashaddr.lower()
-    pos = cashaddr.rfind(':')
+    pos = cashaddr.rfind(b':')
     if pos < 0:
-        cashaddr = "%s:%s" % (default_prefix.lower(), cashaddr)
+        cashaddr = b"%s:%s" % (default_prefix.lower(), cashaddr)
         pos = len(default_prefix)
     if len(cashaddr) - pos - 1 <= 8 or len(cashaddr) - pos - 1 > 112:
         return (None, None)
@@ -168,8 +167,8 @@ def encode(prefix, ver, data):
     tmp = len(data) * 8
     if tmp > 256:
         dlen ^= 0x04
-        tmp /= 2
-    dlen += (tmp - 160) / 32
+        tmp //= 2
+    dlen += (tmp - 160) // 32
     ver += dlen
     bits = convertbits([ver] + data, 8, 5)
     ret = assemble(prefix, bits)
